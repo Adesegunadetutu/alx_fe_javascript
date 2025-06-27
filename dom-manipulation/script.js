@@ -1,4 +1,3 @@
-// Load quotes from localStorage or use defaults
 let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { text: "Be yourself; everyone else is already taken.", category: "Humor" },
   { text: "Do or do not. There is no try.", category: "Motivation" },
@@ -6,12 +5,10 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { text: "Stay hungry, stay foolish.", category: "Motivation" }
 ];
 
-// Save quotes to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-// Populate categories in dropdown
 function populateCategories() {
   const categorySelect = document.getElementById("categoryFilter");
   categorySelect.innerHTML = '<option value="all">All Categories</option>';
@@ -31,7 +28,6 @@ function populateCategories() {
   }
 }
 
-// Filter quotes by selected category
 function filterQuotes() {
   const selectedCategory = document.getElementById("categoryFilter").value;
   localStorage.setItem("selectedCategory", selectedCategory);
@@ -53,14 +49,12 @@ function filterQuotes() {
   sessionStorage.setItem("lastViewedQuote", JSON.stringify(quote));
 }
 
-// Show a completely random quote (ignoring filter)
 function showRandomQuote() {
   const quote = quotes[Math.floor(Math.random() * quotes.length)];
   document.getElementById("quoteDisplay").innerHTML = `"${quote.text}" — <em>${quote.category}</em>`;
   sessionStorage.setItem("lastViewedQuote", JSON.stringify(quote));
 }
 
-// Add new quote
 function addQuote() {
   const text = document.getElementById("newQuoteText").value.trim();
   const category = document.getElementById("newQuoteCategory").value.trim();
@@ -81,7 +75,6 @@ function addQuote() {
   filterQuotes();
 }
 
-// Create the quote form dynamically
 function createAddQuoteForm() {
   const formContainer = document.createElement("div");
 
@@ -106,7 +99,6 @@ function createAddQuoteForm() {
   document.body.insertBefore(formContainer, document.querySelector("hr"));
 }
 
-// Import from JSON file
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function (e) {
@@ -131,7 +123,6 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// Export to JSON file
 function exportToJsonFile() {
   const dataStr = JSON.stringify(quotes, null, 2);
   const blob = new Blob([dataStr], { type: "application/json" });
@@ -145,7 +136,7 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-// ✅ Async fetch from server using await
+// ✅ Required: fetch from server using async/await
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
@@ -163,7 +154,7 @@ async function fetchQuotesFromServer() {
   }
 }
 
-// ✅ Handle conflicts during sync
+// ✅ Conflict resolution logic
 async function handleServerQuotes(serverQuotes) {
   let conflicts = [];
 
@@ -191,7 +182,29 @@ async function handleServerQuotes(serverQuotes) {
   }
 }
 
-// Load on page start
+// ✅ POST quotes to server using mock API
+async function syncQuotes() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quotes)
+    });
+
+    if (!response.ok) throw new Error("Failed to sync quotes");
+
+    const result = await response.json();
+    console.log("Quotes synced to server:", result);
+    alert("Quotes successfully synced with server.");
+  } catch (error) {
+    console.error("Sync error:", error);
+    alert("Failed to sync quotes with server.");
+  }
+}
+
+// ✅ Load on page start
 window.addEventListener("load", () => {
   createAddQuoteForm();
   populateCategories();
@@ -203,8 +216,7 @@ window.addEventListener("load", () => {
   }
 });
 
-// Button listener
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 
-// Optional auto-sync every 30s
-// setInterval(fetchQuotesFromServer, 30000);
+// ✅ Optional: auto fetch from server every 30 seconds
+setInterval(fetchQuotesFromServer, 30000);
