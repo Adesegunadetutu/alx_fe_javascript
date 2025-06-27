@@ -145,26 +145,26 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-// ✅ Fetch quotes from mock server and handle conflicts
-function fetchQuotesFromServer() {
-  fetch("https://jsonplaceholder.typicode.com/posts")
-    .then(response => response.json())
-    .then(serverData => {
-      const serverQuotes = serverData.slice(0, 10).map(item => ({
-        text: item.title,
-        category: "Server"
-      }));
+// ✅ Async fetch from server using await
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const serverData = await response.json();
 
-      handleServerQuotes(serverQuotes);
-    })
-    .catch(error => {
-      console.error("Error fetching from server:", error);
-      alert("Failed to fetch server quotes.");
-    });
+    const serverQuotes = serverData.slice(0, 10).map(item => ({
+      text: item.title,
+      category: "Server"
+    }));
+
+    await handleServerQuotes(serverQuotes);
+  } catch (error) {
+    console.error("Error fetching from server:", error);
+    alert("Failed to fetch server quotes.");
+  }
 }
 
-// ✅ Handle sync & conflict resolution
-function handleServerQuotes(serverQuotes) {
+// ✅ Handle conflicts during sync
+async function handleServerQuotes(serverQuotes) {
   let conflicts = [];
 
   serverQuotes.forEach(serverQuote => {
@@ -203,8 +203,8 @@ window.addEventListener("load", () => {
   }
 });
 
-// Button event
+// Button listener
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 
-// Optional: auto-sync every 30s
+// Optional auto-sync every 30s
 // setInterval(fetchQuotesFromServer, 30000);
