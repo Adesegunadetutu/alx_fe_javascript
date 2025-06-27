@@ -210,5 +210,8 @@ function syncWithServer() {
       console.error("Sync failed:", error);
       alert("Failed to sync with server.");
     });
+    // ✅ Auto sync every 30 seconds (simulated polling)
+setInterval(syncWithServer, 30000); // Every 30 seconds
+
 }
 
