@@ -166,3 +166,49 @@ window.addEventListener("load", () => {
 });
 
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+// ✅ Simulated server URL (mock for now)
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Simulate with first 10 as quotes
+
+// ✅ Sync local quotes with server and resolve conflicts
+function syncWithServer() {
+  fetch(SERVER_URL)
+    .then(response => response.json())
+    .then(serverData => {
+      const serverQuotes = serverData.slice(0, 10).map(item => ({
+        text: item.title,
+        category: "Server" // simulate category
+      }));
+
+      let conflicts = [];
+
+      serverQuotes.forEach(serverQuote => {
+        const existing = quotes.find(q => q.text === serverQuote.text);
+
+        if (existing) {
+          if (existing.category !== serverQuote.category) {
+            // Conflict: update category from server (server wins)
+            existing.category = serverQuote.category;
+            conflicts.push(serverQuote.text);
+          }
+        } else {
+          // New quote from server
+          quotes.push(serverQuote);
+        }
+      });
+
+      saveQuotes();
+      populateCategories();
+      filterQuotes();
+
+      if (conflicts.length > 0) {
+        alert(`Conflicts resolved. Server updated ${conflicts.length} quote(s).`);
+      } else {
+        alert("Sync complete. No conflicts found.");
+      }
+    })
+    .catch(error => {
+      console.error("Sync failed:", error);
+      alert("Failed to sync with server.");
+    });
+}
+
